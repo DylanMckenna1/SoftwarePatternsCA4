@@ -1,7 +1,13 @@
 package com.dylan.clothesstore.config;
 
-import com.dylan.clothesstore.model.*;
-import com.dylan.clothesstore.repository.*;
+import com.dylan.clothesstore.model.Category;
+import com.dylan.clothesstore.model.Manufacturer;
+import com.dylan.clothesstore.model.Product;
+import com.dylan.clothesstore.model.Role;
+import com.dylan.clothesstore.repository.CategoryRepository;
+import com.dylan.clothesstore.repository.ManufacturerRepository;
+import com.dylan.clothesstore.repository.ProductRepository;
+import com.dylan.clothesstore.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,51 +25,63 @@ public class DataLoader {
 
         return args -> {
 
-            // Roles
-            Role customer = new Role();
-            customer.setName("CUSTOMER");
-            roleRepo.save(customer);
+            Role customer = roleRepo.findByName("CUSTOMER").orElseGet(() -> {
+                Role role = new Role();
+                role.setName("CUSTOMER");
+                return roleRepo.save(role);
+            });
 
-            Role admin = new Role();
-            admin.setName("ADMIN");
-            roleRepo.save(admin);
+            Role admin = roleRepo.findByName("ADMIN").orElseGet(() -> {
+                Role role = new Role();
+                role.setName("ADMIN");
+                return roleRepo.save(role);
+            });
 
-            // Categories
-            Category hoodies = new Category();
-            hoodies.setName("Hoodies");
-            categoryRepo.save(hoodies);
+            Category hoodies = categoryRepo.findByName("Hoodies").orElseGet(() -> {
+                Category category = new Category();
+                category.setName("Hoodies");
+                return categoryRepo.save(category);
+            });
 
-            Category tshirts = new Category();
-            tshirts.setName("T-Shirts");
-            categoryRepo.save(tshirts);
+            Category tshirts = categoryRepo.findByName("T-Shirts").orElseGet(() -> {
+                Category category = new Category();
+                category.setName("T-Shirts");
+                return categoryRepo.save(category);
+            });
 
-            // Manufacturer
-            Manufacturer nike = new Manufacturer();
-            nike.setName("Nike");
-            manufacturerRepo.save(nike);
+            Manufacturer nike = manufacturerRepo.findByName("Nike").orElseGet(() -> {
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setName("Nike");
+                return manufacturerRepo.save(manufacturer);
+            });
 
-            Manufacturer adidas = new Manufacturer();
-            adidas.setName("Adidas");
-            manufacturerRepo.save(adidas);
+            Manufacturer adidas = manufacturerRepo.findByName("Adidas").orElseGet(() -> {
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setName("Adidas");
+                return manufacturerRepo.save(manufacturer);
+            });
 
-            // Products
-            Product p1 = new Product();
-            p1.setTitle("Nike Hoodie");
-            p1.setDescription("Comfortable Nike hoodie");
-            p1.setPrice(new BigDecimal("59.99"));
-            p1.setStockQuantity(10);
-            p1.setCategory(hoodies);
-            p1.setManufacturer(nike);
-            productRepo.save(p1);
+            productRepo.findByTitle("Nike Hoodie").orElseGet(() -> {
+                Product product = new Product();
+                product.setTitle("Nike Hoodie");
+                product.setDescription("Comfortable Nike hoodie");
+                product.setPrice(new BigDecimal("59.99"));
+                product.setStockQuantity(10);
+                product.setCategory(hoodies);
+                product.setManufacturer(nike);
+                return productRepo.save(product);
+            });
 
-            Product p2 = new Product();
-            p2.setTitle("Adidas T-Shirt");
-            p2.setDescription("Lightweight Adidas tee");
-            p2.setPrice(new BigDecimal("29.99"));
-            p2.setStockQuantity(20);
-            p2.setCategory(tshirts);
-            p2.setManufacturer(adidas);
-            productRepo.save(p2);
+            productRepo.findByTitle("Adidas T-Shirt").orElseGet(() -> {
+                Product product = new Product();
+                product.setTitle("Adidas T-Shirt");
+                product.setDescription("Lightweight Adidas tee");
+                product.setPrice(new BigDecimal("29.99"));
+                product.setStockQuantity(20);
+                product.setCategory(tshirts);
+                product.setManufacturer(adidas);
+                return productRepo.save(product);
+            });
         };
     }
 }
