@@ -35,7 +35,10 @@ function renderProducts(products) {
             <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
             <p class="product-meta">Stock: ${product.stockQuantity}</p>
             <div class="product-price">€${Number(product.price).toFixed(2)}</div>
-            <button class="cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
+            <div class="product-actions">
+                <button class="cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
+                <a class="details-button" href="product.html?id=${product.id}">View Details</a>
+            </div>
         </div>
     `).join("");
 }
@@ -60,10 +63,25 @@ function buildQuery() {
     return queryString ? `?${queryString}` : "";
 }
 
-function addToCart(productId) {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.push(productId);
+function getCart() {
+    return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function addToCart(productId) {
+    const cart = getCart();
+    const existingItem = cart.find(item => item.productId === productId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({ productId: productId, quantity: 1 });
+    }
+
+    saveCart(cart);
     alert("Product added to cart");
 }
 
@@ -75,7 +93,7 @@ async function loadCart() {
         return;
     }
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const cart = getCart();
 
     if (cart.length === 0) {
         cartItemsContainer.innerHTML = `<p class="empty-message">Your cart is empty.</p>`;
@@ -87,7 +105,10 @@ async function loadCart() {
         const response = await fetch(`${API_BASE_URL}/products`);
         const products = await response.json();
 
-        const cartProducts = cart.map(id => products.find(product => product.id === id)).filter(Boolean);
+        const cartProducts = cart.map(item => {
+            const product = products.find(productEntry => productEntry.id === item.productId);
+            return product ? { ...product, quantity: item.quantity } : null;
+        }).filter(Boolean);
 
         if (cartProducts.length === 0) {
             cartItemsContainer.innerHTML = `<p class="empty-message">Your cart is empty.</p>`;
@@ -95,22 +116,26 @@ async function loadCart() {
             return;
         }
 
-        cartItemsContainer.innerHTML = cartProducts.map((product, index) => `
+        cartItemsContainer.innerHTML = cartProducts.map(product => `
             <div class="cart-item">
                 <div>
                     <h3>${product.title}</h3>
                     <p>${product.description || "No description available."}</p>
                     <p class="product-meta">Category: ${product.category ? product.category.name : "N/A"}</p>
                     <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
+                    <p class="product-meta">Quantity: ${product.quantity}</p>
                 </div>
                 <div>
-                    <div class="product-price">€${Number(product.price).toFixed(2)}</div>
-                    <button class="remove-button" onclick="removeFromCart(${index})">Remove</button>
+                    <div class="product-price">€${(Number(product.price) * product.quantity).toFixed(2)}</div>
+                    <button class="remove-button" onclick="removeFromCart(${product.id})">Remove</button>
                 </div>
             </div>
         `).join("");
 
-        const total = cartProducts.reduce((sum, product) => sum + Number(product.price), 0);
+        const total = cartProducts.reduce((sum, product) => {
+            return sum + (Number(product.price) * product.quantity);
+        }, 0);
+
         cartTotalContainer.textContent = `€${total.toFixed(2)}`;
     } catch (error) {
         console.error("Error loading cart:", error);
@@ -119,11 +144,53 @@ async function loadCart() {
     }
 }
 
-function removeFromCart(index) {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.splice(index, 1);
-    localStorage.setItem("cart", JSON.stringify(cart));
+function removeFromCart(productId) {
+    let cart = getCart();
+    cart = cart.filter(item => item.productId !== productId);
+    saveCart(cart);
     loadCart();
+}
+
+async function loadProductDetails() {
+    const productDetailsContainer = document.getElementById("productDetails");
+
+    if (!productDetailsContainer) {
+        return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+
+    if (!productId) {
+        productDetailsContainer.innerHTML = `<p class="empty-message">Product not found.</p>`;
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/products`);
+        const products = await response.json();
+        const product = products.find(item => item.id === Number(productId));
+
+        if (!product) {
+            productDetailsContainer.innerHTML = `<p class="empty-message">Product not found.</p>`;
+            return;
+        }
+
+        productDetailsContainer.innerHTML = `
+            <div class="product-detail-card">
+                <h1>${product.title}</h1>
+                <p>${product.description || "No description available."}</p>
+                <p class="product-meta">Category: ${product.category ? product.category.name : "N/A"}</p>
+                <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
+                <p class="product-meta">Stock: ${product.stockQuantity}</p>
+                <div class="product-price">€${Number(product.price).toFixed(2)}</div>
+                <button class="cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
+            </div>
+        `;
+    } catch (error) {
+        console.error("Error loading product details:", error);
+        productDetailsContainer.innerHTML = `<p class="empty-message">Could not load product details.</p>`;
+    }
 }
 
 if (searchButton) {
@@ -150,4 +217,5 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     loadCart();
+    loadProductDetails();
 });

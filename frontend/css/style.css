@@ -154,3 +154,29 @@ body {
 .cart-summary h2 {
     margin-top: 0;
 }
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.details-button {
+    display: inline-block;
+    padding: 10px 14px;
+    background-color: #ddd;
+    color: #111;
+    text-decoration: none;
+}
+
+.details-button:hover {
+    background-color: #ccc;
+}
+
+.product-detail-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    max-width: 700px;
+}
