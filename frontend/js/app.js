@@ -31,10 +31,10 @@ function renderProducts(products) {
         <div class="product-card">
             <h3>${product.title}</h3>
             <p>${product.description || "No description available."}</p>
-            <p class="product-meta">Category: ${product.category ? product.category.name : "N/A"}</p>
-            <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
+            <p class="product-meta">Category: ${product.categoryName || "N/A"}</p>
+            <p class="product-meta">Manufacturer: ${product.manufacturerName || "N/A"}</p>
             <p class="product-meta">Stock: ${product.stockQuantity}</p>
-            <div class="product-price">€${Number(product.price).toFixed(2)}</div>
+            <div class="product-price">€${Number(product.discountedPrice).toFixed(2)}</div>
             <div class="product-actions">
                 <button class="cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
                 <a class="details-button" href="product.html?id=${product.id}">View Details</a>
@@ -58,6 +58,8 @@ function buildQuery() {
         params.append("sortBy", sortBy);
         params.append("direction", direction);
     }
+
+    params.append("discount", "true");
 
     const queryString = params.toString();
     return queryString ? `?${queryString}` : "";
@@ -102,7 +104,7 @@ async function loadCart() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/products`);
+        const response = await fetch(`${API_BASE_URL}/products?discount=true`);
         const products = await response.json();
 
         const cartProducts = cart.map(item => {
@@ -121,19 +123,19 @@ async function loadCart() {
                 <div>
                     <h3>${product.title}</h3>
                     <p>${product.description || "No description available."}</p>
-                    <p class="product-meta">Category: ${product.category ? product.category.name : "N/A"}</p>
-                    <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
+                    <p class="product-meta">Category: ${product.categoryName || "N/A"}</p>
+                    <p class="product-meta">Manufacturer: ${product.manufacturerName || "N/A"}</p>
                     <p class="product-meta">Quantity: ${product.quantity}</p>
                 </div>
                 <div>
-                    <div class="product-price">€${(Number(product.price) * product.quantity).toFixed(2)}</div>
+                    <div class="product-price">€${(Number(product.discountedPrice) * product.quantity).toFixed(2)}</div>
                     <button class="remove-button" onclick="removeFromCart(${product.id})">Remove</button>
                 </div>
             </div>
         `).join("");
 
         const total = cartProducts.reduce((sum, product) => {
-            return sum + (Number(product.price) * product.quantity);
+            return sum + (Number(product.discountedPrice) * product.quantity);
         }, 0);
 
         cartTotalContainer.textContent = `€${total.toFixed(2)}`;
@@ -167,7 +169,7 @@ async function loadProductDetails() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/products`);
+        const response = await fetch(`${API_BASE_URL}/products?discount=true`);
         const products = await response.json();
         const product = products.find(item => item.id === Number(productId));
 
@@ -180,10 +182,11 @@ async function loadProductDetails() {
             <div class="product-detail-card">
                 <h1>${product.title}</h1>
                 <p>${product.description || "No description available."}</p>
-                <p class="product-meta">Category: ${product.category ? product.category.name : "N/A"}</p>
-                <p class="product-meta">Manufacturer: ${product.manufacturer ? product.manufacturer.name : "N/A"}</p>
+                <p class="product-meta">Category: ${product.categoryName || "N/A"}</p>
+                <p class="product-meta">Manufacturer: ${product.manufacturerName || "N/A"}</p>
                 <p class="product-meta">Stock: ${product.stockQuantity}</p>
-                <div class="product-price">€${Number(product.price).toFixed(2)}</div>
+                <p class="product-meta">Original Price: €${Number(product.price).toFixed(2)}</p>
+                <div class="product-price">Discounted Price: €${Number(product.discountedPrice).toFixed(2)}</div>
                 <button class="cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
             </div>
         `;
@@ -207,13 +210,13 @@ if (resetButton) {
         if (sortSelect) {
             sortSelect.value = "";
         }
-        fetchProducts();
+        fetchProducts("?discount=true");
     });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
     if (productGrid) {
-        fetchProducts();
+        fetchProducts("?discount=true");
     }
 
     loadCart();
