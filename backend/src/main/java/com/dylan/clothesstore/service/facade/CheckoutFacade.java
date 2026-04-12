@@ -9,6 +9,8 @@ import com.dylan.clothesstore.repository.ProductRepository;
 import com.dylan.clothesstore.service.CartService;
 import com.dylan.clothesstore.service.strategy.PricingContext;
 import org.springframework.stereotype.Service;
+import com.dylan.clothesstore.service.observer.OrderObserver;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,16 +23,19 @@ public class CheckoutFacade {
     private final ProductRepository productRepository;
     private final CustomerOrderRepository customerOrderRepository;
     private final PricingContext pricingContext;
+    private final List<OrderObserver> observers;
 
     public CheckoutFacade(CartService cartService,
-                          ProductRepository productRepository,
-                          CustomerOrderRepository customerOrderRepository,
-                          PricingContext pricingContext) {
-        this.cartService = cartService;
-        this.productRepository = productRepository;
-        this.customerOrderRepository = customerOrderRepository;
-        this.pricingContext = pricingContext;
-    }
+                      ProductRepository productRepository,
+                      CustomerOrderRepository customerOrderRepository,
+                      PricingContext pricingContext,
+                      List<OrderObserver> observers) {
+    this.cartService = cartService;
+    this.productRepository = productRepository;
+    this.customerOrderRepository = customerOrderRepository;
+    this.pricingContext = pricingContext;
+    this.observers = observers;
+}
 
     public CheckoutResponseDto checkout() {
         Map<Long, Integer> cart = cartService.getCart();
@@ -70,16 +75,21 @@ public class CheckoutFacade {
 
         customerOrder.setTotalAmount(total);
 
-        CustomerOrder savedOrder = customerOrderRepository.save(customerOrder);
 
-        cartService.clearCart();
+ CustomerOrder savedOrder = customerOrderRepository.save(customerOrder);
 
-        CheckoutResponseDto response = new CheckoutResponseDto();
-        response.setOrderId(savedOrder.getId());
-        response.setTotalAmount(savedOrder.getTotalAmount());
-        response.setStatus(savedOrder.getStatus());
-        response.setItemCount(itemCount);
+cartService.clearCart();
 
-        return response;
+for (OrderObserver observer : observers) {
+    observer.update("New order placed. Order ID: " + savedOrder.getId() + ", Total: " + savedOrder.getTotalAmount());
+}
+
+CheckoutResponseDto response = new CheckoutResponseDto();
+response.setOrderId(savedOrder.getId());
+response.setTotalAmount(savedOrder.getTotalAmount());
+response.setStatus(savedOrder.getStatus());
+response.setItemCount(itemCount);
+
+return response;
     }
 }
