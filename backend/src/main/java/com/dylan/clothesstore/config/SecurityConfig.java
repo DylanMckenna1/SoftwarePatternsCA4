@@ -14,7 +14,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/products", "/api/products/**", "/api/cart/**", "/api/checkout/**").permitAll()
+                        .requestMatchers(
+                                "/api/products",
+                                "/api/products/**",
+                                "/api/cart/**",
+                                "/api/checkout/**",
+                                "/api/orders/**"
+                        ).permitAll()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults());
