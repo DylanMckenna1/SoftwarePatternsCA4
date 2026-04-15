@@ -3,6 +3,8 @@ const searchInput = document.getElementById("searchInput");
 const sortSelect = document.getElementById("sortSelect");
 const searchButton = document.getElementById("searchButton");
 const resetButton = document.getElementById("resetButton");
+const checkoutButton = document.getElementById("checkoutButton");
+const checkoutMessage = document.getElementById("checkoutMessage");
 
 async function fetchProducts(query = "") {
     try {
@@ -196,6 +198,62 @@ async function loadProductDetails() {
     }
 }
 
+async function checkoutCart() {
+    if (checkoutMessage) {
+        checkoutMessage.textContent = "";
+        checkoutMessage.className = "";
+    }
+
+    const cart = getCart();
+
+    if (!cart || cart.length === 0) {
+        if (checkoutMessage) {
+            checkoutMessage.textContent = "Your cart is empty.";
+            checkoutMessage.className = "error-message";
+        }
+        return;
+    }
+
+    try {
+        await fetch(`${API_BASE_URL}/cart/clear`, {
+            method: "POST"
+        });
+
+        for (const item of cart) {
+            for (let i = 0; i < item.quantity; i++) {
+                await fetch(`${API_BASE_URL}/cart/add/${item.productId}`, {
+                    method: "POST"
+                });
+            }
+        }
+
+        const response = await fetch(`${API_BASE_URL}/checkout`, {
+            method: "POST"
+        });
+
+        if (!response.ok) {
+            throw new Error("Checkout failed");
+        }
+
+        const result = await response.json();
+
+        localStorage.removeItem("cart");
+        loadCart();
+
+        if (checkoutMessage) {
+            checkoutMessage.textContent = `Order placed successfully. Order ID: ${result.orderId}`;
+            checkoutMessage.className = "success-message";
+        }
+    } catch (error) {
+        console.error("Checkout error:", error);
+
+        if (checkoutMessage) {
+            checkoutMessage.textContent = "Checkout failed. Please try again.";
+            checkoutMessage.className = "error-message";
+        }
+    }
+}
+
 if (searchButton) {
     searchButton.addEventListener("click", () => {
         fetchProducts(buildQuery());
@@ -222,3 +280,9 @@ window.addEventListener("DOMContentLoaded", () => {
     loadCart();
     loadProductDetails();
 });
+
+if (checkoutButton) {
+    checkoutButton.addEventListener("click", () => {
+        checkoutCart();
+    });
+}

@@ -180,3 +180,16 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     max-width: 700px;
 }
+
+#checkoutMessage {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: red;
+}
