@@ -193,3 +193,36 @@ body {
 .error-message {
     color: red;
 }
+
+.rating-section {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #ccc;
+}
+
+.rating-section label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.rating-section input,
+.rating-section select,
+.rating-section textarea {
+    width: 100%;
+    max-width: 420px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.rating-section textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#ratingMessage {
+    margin-top: 12px;
+    font-weight: bold;
+}

@@ -5,6 +5,12 @@ const searchButton = document.getElementById("searchButton");
 const resetButton = document.getElementById("resetButton");
 const checkoutButton = document.getElementById("checkoutButton");
 const checkoutMessage = document.getElementById("checkoutMessage");
+const ratingSection = document.getElementById("ratingSection");
+const orderIdInput = document.getElementById("orderIdInput");
+const ratingScore = document.getElementById("ratingScore");
+const ratingComment = document.getElementById("ratingComment");
+const submitRatingButton = document.getElementById("submitRatingButton");
+const ratingMessage = document.getElementById("ratingMessage");
 
 async function fetchProducts(query = "") {
     try {
@@ -244,12 +250,72 @@ async function checkoutCart() {
             checkoutMessage.textContent = `Order placed successfully. Order ID: ${result.orderId}`;
             checkoutMessage.className = "success-message";
         }
+        if (ratingSection) {
+            ratingSection.style.display = "block";
+        }
+
+        if (orderIdInput) {
+            orderIdInput.value = result.orderId;
+        }
+
     } catch (error) {
         console.error("Checkout error:", error);
 
         if (checkoutMessage) {
             checkoutMessage.textContent = "Checkout failed. Please try again.";
             checkoutMessage.className = "error-message";
+        }
+    }
+}
+
+async function submitRating() {
+    if (ratingMessage) {
+        ratingMessage.textContent = "";
+        ratingMessage.className = "";
+    }
+
+    const orderId = orderIdInput ? orderIdInput.value.trim() : "";
+    const score = ratingScore ? parseInt(ratingScore.value) : 5;
+    const comment = ratingComment ? ratingComment.value.trim() : "";
+
+    if (!orderId) {
+        if (ratingMessage) {
+            ratingMessage.textContent = "Please enter an order ID.";
+            ratingMessage.className = "error-message";
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}/rate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                score: score,
+                comment: comment
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Rating submission failed");
+        }
+
+        if (ratingMessage) {
+            ratingMessage.textContent = "Rating submitted successfully.";
+            ratingMessage.className = "success-message";
+        }
+
+        if (ratingComment) {
+            ratingComment.value = "";
+        }
+    } catch (error) {
+        console.error("Rating error:", error);
+
+        if (ratingMessage) {
+            ratingMessage.textContent = "Failed to submit rating.";
+            ratingMessage.className = "error-message";
         }
     }
 }
@@ -280,6 +346,12 @@ window.addEventListener("DOMContentLoaded", () => {
     loadCart();
     loadProductDetails();
 });
+
+if (submitRatingButton) {
+    submitRatingButton.addEventListener("click", () => {
+        submitRating();
+    });
+}
 
 if (checkoutButton) {
     checkoutButton.addEventListener("click", () => {

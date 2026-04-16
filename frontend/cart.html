@@ -26,12 +26,33 @@
         <section id="cartItems"></section>
 
         <section class="cart-summary">
-            <h2>Total</h2>
-            <p id="cartTotal">€0.00</p>
-            <button id="checkoutButton" class="cart-button">Checkout</button>
-            <p id="checkoutMessage"></p>
-        </section>
-    </main>
+    <h2>Total</h2>
+    <p id="cartTotal">€0.00</p>
+    <button id="checkoutButton" class="cart-button">Checkout</button>
+    <p id="checkoutMessage"></p>
+
+    <div id="ratingSection" class="rating-section" style="display: none;">
+        <h3>Rate Your Order</h3>
+
+        <label for="orderIdInput">Order ID</label>
+        <input type="number" id="orderIdInput" placeholder="Enter order ID">
+
+        <label for="ratingScore">Rating</label>
+        <select id="ratingScore">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Good</option>
+            <option value="3">3 - Average</option>
+            <option value="2">2 - Poor</option>
+            <option value="1">1 - Bad</option>
+        </select>
+
+        <label for="ratingComment">Comment</label>
+        <textarea id="ratingComment" placeholder="Write a short review"></textarea>
+
+        <button id="submitRatingButton" class="cart-button">Submit Rating</button>
+        <p id="ratingMessage"></p>
+    </div>
+</section>
 
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
