@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Clothes Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="brand">Clothes Store</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="page-header">
+            <h1>Login</h1>
+            <p>Sign in to your account.</p>
+        </section>
+
+        <section class="auth-card">
+            <form id="loginForm" class="auth-form">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+
+                <button type="submit" class="cart-button">Login</button>
+                <p id="loginMessage"></p>
+            </form>
+        </section>
+    </main>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

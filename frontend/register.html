@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Clothes Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="brand">Clothes Store</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="page-header">
+            <h1>Create Account</h1>
+            <p>Register a customer account to use the store.</p>
+        </section>
+
+        <section class="auth-card">
+            <form id="registerForm" class="auth-form">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" required>
+
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" required>
+
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" id="phoneNumber" required>
+
+                <button type="submit" class="cart-button">Register</button>
+                <p id="registerMessage"></p>
+            </form>
+        </section>
+    </main>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

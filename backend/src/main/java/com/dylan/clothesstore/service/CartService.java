@@ -2,6 +2,7 @@ package com.dylan.clothesstore.service;
 
 import com.dylan.clothesstore.service.command.AddToCartCommand;
 import com.dylan.clothesstore.service.command.CartCommandInvoker;
+import com.dylan.clothesstore.service.command.ClearCartCommand;
 import com.dylan.clothesstore.service.command.RemoveFromCartCommand;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,6 @@ public class CartService {
     }
 
     public void clearCart() {
-        cart.clear();
+        cartCommandInvoker.executeCommand(new ClearCartCommand(cart));
     }
 }

@@ -7,9 +7,34 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Clothes Store</h1>
-    <p>Project setup complete.</p>
+    <header class="navbar">
+        <div class="brand">Clothes Store <span id="cartCountBadge" class="cart-badge">0</span></div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </nav>
+    </header>
 
-    <script src="js/app.js"></script>
+    <main class="page-container">
+        <section class="page-header">
+            <h1>Clothes Store</h1>
+            <p>An online store for browsing clothing products, placing orders and leaving feedback after purchase.</p>
+        </section>
+
+        <section class="cart-summary">
+            <h2>Shop Online</h2>
+            <p>Browse the catalogue, search and sort products, add items to your cart and place an order.</p>
+
+            <div class="home-actions">
+                <a href="products.html" class="cart-button">Browse Products</a>
+                <a href="register.html" class="details-button">Create Account</a>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
