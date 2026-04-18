@@ -4,16 +4,18 @@ import com.dylan.clothesstore.dto.CheckoutResponseDto;
 import com.dylan.clothesstore.model.CustomerOrder;
 import com.dylan.clothesstore.model.OrderItem;
 import com.dylan.clothesstore.model.Product;
+import com.dylan.clothesstore.model.User;
 import com.dylan.clothesstore.repository.CustomerOrderRepository;
 import com.dylan.clothesstore.repository.ProductRepository;
+import com.dylan.clothesstore.repository.UserRepository;
 import com.dylan.clothesstore.service.CartService;
+import com.dylan.clothesstore.service.observer.OrderObserver;
 import com.dylan.clothesstore.service.strategy.PricingContext;
 import org.springframework.stereotype.Service;
-import com.dylan.clothesstore.service.observer.OrderObserver;
-import java.util.List;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -24,29 +26,36 @@ public class CheckoutFacade {
     private final CustomerOrderRepository customerOrderRepository;
     private final PricingContext pricingContext;
     private final List<OrderObserver> observers;
+    private final UserRepository userRepository;
 
     public CheckoutFacade(CartService cartService,
-                      ProductRepository productRepository,
-                      CustomerOrderRepository customerOrderRepository,
-                      PricingContext pricingContext,
-                      List<OrderObserver> observers) {
-    this.cartService = cartService;
-    this.productRepository = productRepository;
-    this.customerOrderRepository = customerOrderRepository;
-    this.pricingContext = pricingContext;
-    this.observers = observers;
-}
+                          ProductRepository productRepository,
+                          CustomerOrderRepository customerOrderRepository,
+                          PricingContext pricingContext,
+                          List<OrderObserver> observers,
+                          UserRepository userRepository) {
+        this.cartService = cartService;
+        this.productRepository = productRepository;
+        this.customerOrderRepository = customerOrderRepository;
+        this.pricingContext = pricingContext;
+        this.observers = observers;
+        this.userRepository = userRepository;
+    }
 
-    public CheckoutResponseDto checkout() {
+    public CheckoutResponseDto checkout(String email) {
         Map<Long, Integer> cart = cartService.getCart();
 
         if (cart.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
         }
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         CustomerOrder customerOrder = new CustomerOrder();
         customerOrder.setOrderDate(LocalDateTime.now());
         customerOrder.setStatus("PLACED");
+        customerOrder.setUser(user);
 
         BigDecimal total = BigDecimal.ZERO;
         int itemCount = 0;
@@ -75,21 +84,20 @@ public class CheckoutFacade {
 
         customerOrder.setTotalAmount(total);
 
+        CustomerOrder savedOrder = customerOrderRepository.save(customerOrder);
 
- CustomerOrder savedOrder = customerOrderRepository.save(customerOrder);
+        cartService.clearCart();
 
-cartService.clearCart();
+        for (OrderObserver observer : observers) {
+            observer.update("New order placed. Order ID: " + savedOrder.getId() + ", Total: " + savedOrder.getTotalAmount());
+        }
 
-for (OrderObserver observer : observers) {
-    observer.update("New order placed. Order ID: " + savedOrder.getId() + ", Total: " + savedOrder.getTotalAmount());
-}
+        CheckoutResponseDto response = new CheckoutResponseDto();
+        response.setOrderId(savedOrder.getId());
+        response.setTotalAmount(savedOrder.getTotalAmount());
+        response.setStatus(savedOrder.getStatus());
+        response.setItemCount(itemCount);
 
-CheckoutResponseDto response = new CheckoutResponseDto();
-response.setOrderId(savedOrder.getId());
-response.setTotalAmount(savedOrder.getTotalAmount());
-response.setStatus(savedOrder.getStatus());
-response.setItemCount(itemCount);
-
-return response;
+        return response;
     }
 }

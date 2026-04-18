@@ -101,7 +101,17 @@ export async function checkoutCart(updateCartCount) {
             }
         }
 
-        const result = await checkoutOrder();
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!currentUser || !currentUser.email) {
+    if (checkoutMessage) {
+        checkoutMessage.textContent = "Please log in before placing an order.";
+        checkoutMessage.className = "error-message";
+            }
+        return;
+        }
+
+const result = await checkoutOrder(currentUser.email);
 
         CartManager.clearCart();
         updateCartCount();

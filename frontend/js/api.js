@@ -37,9 +37,13 @@ export async function addBackendCartItem(productId) {
     });
 }
 
-export async function checkoutOrder() {
+export async function checkoutOrder(email) {
     return fetchJson(`${API_BASE_URL}/checkout`, {
-        method: "POST"
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
     });
 }
 
@@ -74,4 +78,48 @@ export async function loginUser(payload) {
         },
         body: JSON.stringify(payload)
     });
+}
+
+function buildAdminHeaders(username, password) {
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+    };
+}
+
+export async function getAdminProducts(username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/products`, {
+        headers: buildAdminHeaders(username, password)
+    });
+}
+
+export async function createAdminProduct(payload, username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/products`, {
+        method: "POST",
+        headers: buildAdminHeaders(username, password),
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function updateAdminProduct(productId, payload, username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/products/${productId}`, {
+        method: "PUT",
+        headers: buildAdminHeaders(username, password),
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function deleteAdminProduct(productId, username, password) {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+    }
+
+    return response.text();
 }
