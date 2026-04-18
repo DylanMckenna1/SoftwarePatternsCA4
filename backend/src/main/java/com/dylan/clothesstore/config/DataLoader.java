@@ -49,6 +49,18 @@ public class DataLoader {
                 return categoryRepo.save(category);
             });
 
+            Category jackets = categoryRepo.findByName("Jackets").orElseGet(() -> {
+                Category category = new Category();
+                category.setName("Jackets");
+                return categoryRepo.save(category);
+            });
+
+            Category tracksuits = categoryRepo.findByName("Tracksuits").orElseGet(() -> {
+                Category category = new Category();
+                category.setName("Tracksuits");
+                return categoryRepo.save(category);
+            });
+
             Manufacturer nike = manufacturerRepo.findByName("Nike").orElseGet(() -> {
                 Manufacturer manufacturer = new Manufacturer();
                 manufacturer.setName("Nike");
@@ -61,27 +73,75 @@ public class DataLoader {
                 return manufacturerRepo.save(manufacturer);
             });
 
-            productRepo.findByTitle("Nike Hoodie").orElseGet(() -> {
-                Product product = new Product();
-                product.setTitle("Nike Hoodie");
-                product.setDescription("Comfortable Nike hoodie");
-                product.setPrice(new BigDecimal("59.99"));
-                product.setStockQuantity(10);
-                product.setCategory(hoodies);
-                product.setManufacturer(nike);
-                return productRepo.save(product);
+            Manufacturer puma = manufacturerRepo.findByName("Puma").orElseGet(() -> {
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setName("Puma");
+                return manufacturerRepo.save(manufacturer);
             });
 
-            productRepo.findByTitle("Adidas T-Shirt").orElseGet(() -> {
-                Product product = new Product();
-                product.setTitle("Adidas T-Shirt");
-                product.setDescription("Lightweight Adidas tee");
-                product.setPrice(new BigDecimal("29.99"));
-                product.setStockQuantity(20);
-                product.setCategory(tshirts);
-                product.setManufacturer(adidas);
-                return productRepo.save(product);
+            Manufacturer northFace = manufacturerRepo.findByName("The North Face").orElseGet(() -> {
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setName("The North Face");
+                return manufacturerRepo.save(manufacturer);
             });
+
+       seedProduct(productRepo, "Nike Hoodie", "Comfortable Nike hoodie", "59.99", 10,
+        "images/Nike-hoodie.jpg",
+        "M", "Black", hoodies, nike);
+
+       seedProduct(productRepo, "Adidas T-Shirt", "Lightweight Adidas tee", "29.99", 20,
+        "images/adidas-tshirt.jpg",
+        "L", "White", tshirts, adidas);
+
+       seedProduct(productRepo, "Puma Zip Hoodie", "Soft zip-up hoodie for everyday wear", "54.99", 14,
+        "images/puma-hoodie.jpg",
+        "M", "Grey", hoodies, puma);
+
+       seedProduct(productRepo, "Nike Training T-Shirt", "Breathable training top", "34.99", 18,
+        "images/nike-tshirt.jpg",
+        "M", "Blue", tshirts, nike);
+
+       seedProduct(productRepo, "Adidas Track Jacket", "Classic track jacket with zip front", "69.99", 12,
+        "images/adidas-jacket.jpg",
+        "L", "Navy", jackets, adidas);
+
+       seedProduct(productRepo, "The North Face Puffer Jacket", "Warm puffer jacket for colder weather", "119.99", 8,
+        "images/north-face-puffer.jpg",
+        "L", "Black", jackets, northFace);
+
+       seedProduct(productRepo, "Puma Tracksuit Bottoms", "Slim fit tracksuit bottoms", "44.99", 16, 
+        "images/puma-bottoms.jpg",
+        "M", "Charcoal", tracksuits, puma);
+
+       seedProduct(productRepo, "Nike Full Tracksuit", "Matching hoodie and jogger set", "89.99", 9,
+        "images/nike-tracksuit.jpg",
+        "L", "Black", tracksuits, nike);
         };
+    }
+
+    private void seedProduct(ProductRepository productRepo,
+                             String title,
+                             String description,
+                             String price,
+                             int stockQuantity,
+                             String imageUrl,
+                             String size,
+                             String colour,
+                             Category category,
+                             Manufacturer manufacturer) {
+
+        productRepo.findByTitle(title).orElseGet(() -> {
+            Product product = new Product();
+            product.setTitle(title);
+            product.setDescription(description);
+            product.setPrice(new BigDecimal(price));
+            product.setStockQuantity(stockQuantity);
+            product.setImageUrl(imageUrl);
+            product.setSize(size);
+            product.setColour(colour);
+            product.setCategory(category);
+            product.setManufacturer(manufacturer);
+            return productRepo.save(product);
+        });
     }
 }

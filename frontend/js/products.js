@@ -33,6 +33,10 @@ function getManufacturerName(product) {
     return "N/A";
 }
 
+function getProductImage(product) {
+    return product.imageUrl || "https://via.placeholder.com/600x400?text=No+Image";
+}
+
 function sortProducts(products) {
     const sortValue = sortSelect ? sortSelect.value : "";
 
@@ -73,10 +77,13 @@ export function renderProducts(products, onCartUpdate) {
 
     productGrid.innerHTML = products.map(product => `
         <div class="product-card">
+            <img class="product-image" src="${getProductImage(product)}" alt="${product.title}">
             <h3>${product.title}</h3>
             <p>${product.description || "No description available."}</p>
             <p class="product-meta">Category: ${getCategoryName(product)}</p>
             <p class="product-meta">Brand: ${getManufacturerName(product)}</p>
+            <p class="product-meta">Size: ${product.size || "N/A"}</p>
+            <p class="product-meta">Colour: ${product.colour || "N/A"}</p>
             <p class="product-meta">Stock: ${product.stockQuantity ?? "N/A"}</p>
             <div class="product-price">€${getDisplayPrice(product).toFixed(2)}</div>
             <div class="product-actions">
@@ -134,10 +141,13 @@ export async function loadProductDetails(onCartUpdate) {
 
         productDetailsContainer.innerHTML = `
             <div class="product-detail-card">
+                <img class="product-detail-image" src="${getProductImage(product)}" alt="${product.title}">
                 <h1>${product.title}</h1>
                 <p>${product.description || "No description available."}</p>
                 <p class="product-meta">Category: ${getCategoryName(product)}</p>
                 <p class="product-meta">Brand: ${getManufacturerName(product)}</p>
+                <p class="product-meta">Size: ${product.size || "N/A"}</p>
+                <p class="product-meta">Colour: ${product.colour || "N/A"}</p>
                 <p class="product-meta">Stock: ${product.stockQuantity ?? "N/A"}</p>
                 <div class="product-price">€${getDisplayPrice(product).toFixed(2)}</div>
                 <button id="detailAddToCartButton" class="cart-button">Add to Cart</button>

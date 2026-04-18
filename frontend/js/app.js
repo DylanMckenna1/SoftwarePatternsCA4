@@ -22,7 +22,49 @@ function updateCartCount() {
     }
 }
 
+function updateNavbarForUser() {
+    const nav = document.querySelector(".navbar nav");
+    if (!nav) return;
+
+    const storedUser = localStorage.getItem("currentUser");
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+    if (!currentUser) {
+        nav.innerHTML = `
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        `;
+        return;
+    }
+
+    const adminLink = currentUser.role === "ADMIN"
+        ? `<a href="admin.html">Admin</a>`
+        : "";
+
+    nav.innerHTML = `
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="cart.html">Cart</a>
+        ${adminLink}
+        <span class="nav-user">Welcome, ${currentUser.firstName}</span>
+        <a href="#" id="logoutLink">Logout</a>
+    `;
+
+    const logoutLink = document.getElementById("logoutLink");
+    if (logoutLink) {
+        logoutLink.addEventListener("click", (event) => {
+            event.preventDefault();
+            localStorage.removeItem("currentUser");
+            window.location.href = "index.html";
+        });
+    }
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
+    updateNavbarForUser();
     updateCartCount();
     await loadProducts(updateCartCount, "?discount=true");
     await loadCart(updateCartCount);

@@ -46,7 +46,7 @@ if (loginForm) {
         try {
             const user = await loginUser(payload);
             localStorage.setItem("currentUser", JSON.stringify(user));
-            setMessage(loginMessage, "Login successful. Redirecting...", "success");
+            setMessage(loginMessage, `Welcome back, ${user.firstName}. Redirecting...`, "success");
 
             setTimeout(() => {
                 window.location.href = "index.html";
