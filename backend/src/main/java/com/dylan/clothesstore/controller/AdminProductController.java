@@ -2,6 +2,7 @@ package com.dylan.clothesstore.controller;
 
 import com.dylan.clothesstore.dto.ProductRequestDto;
 import com.dylan.clothesstore.dto.ProductResponseDto;
+import com.dylan.clothesstore.dto.RestockRequestDto;
 import com.dylan.clothesstore.model.Category;
 import com.dylan.clothesstore.model.Manufacturer;
 import com.dylan.clothesstore.model.Product;
@@ -65,6 +66,22 @@ public class AdminProductController {
 
         productRepository.delete(product);
         return "Product deleted successfully";
+    }
+
+    @PostMapping("/{id}/restock")
+    public ProductResponseDto restockProduct(@PathVariable Long id, @RequestBody RestockRequestDto request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Restock quantity must be greater than zero");
+        }
+
+        int currentStock = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
+        product.setStockQuantity(currentStock + request.getQuantity());
+
+        Product savedProduct = productRepository.save(product);
+        return mapToDto(savedProduct, false);
     }
 
     private void applyRequestToProduct(Product product, ProductRequestDto request) {
