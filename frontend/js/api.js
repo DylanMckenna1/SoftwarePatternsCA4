@@ -4,15 +4,25 @@ export async function fetchJson(url, options = {}) {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-        let errorMessage = `Request failed: ${response.status}`;
+        let errorMessage = "Something went wrong";
 
         try {
-            const errorBody = await response.text();
-            if (errorBody) {
-                errorMessage = errorBody;
+            const text = await response.text();
+
+            try {
+                const json = JSON.parse(text);
+                if (json.message) {
+                    errorMessage = json.message;
+                } else if (json.error) {
+                    errorMessage = json.error;
+                } else {
+                    errorMessage = text;
+                }
+            } catch {
+                errorMessage = text || `Request failed: ${response.status}`;
             }
-        } catch (error) {
-            console.error("Error reading error response:", error);
+        } catch {
+            errorMessage = `Request failed: ${response.status}`;
         }
 
         throw new Error(errorMessage);

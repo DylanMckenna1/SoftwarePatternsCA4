@@ -12,6 +12,7 @@ import com.dylan.clothesstore.service.CartService;
 import com.dylan.clothesstore.service.observer.OrderObserver;
 import com.dylan.clothesstore.service.strategy.PricingContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public class CheckoutFacade {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public CheckoutResponseDto checkout(String email) {
         Map<Long, Integer> cart = cartService.getCart();
 
@@ -67,6 +69,17 @@ public class CheckoutFacade {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
 
+            if (quantity == null || quantity <= 0) {
+                throw new IllegalArgumentException("Invalid quantity for product: " + product.getTitle());
+            }
+
+            if (product.getStockQuantity() == null || product.getStockQuantity() < quantity) {
+                throw new IllegalStateException("Not enough stock for product: " + product.getTitle());
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - quantity);
+            productRepository.save(product);
+
             BigDecimal discountedPrice = pricingContext.calculatePrice(product.getPrice(), true);
             BigDecimal lineTotal = discountedPrice.multiply(BigDecimal.valueOf(quantity));
 
@@ -89,7 +102,11 @@ public class CheckoutFacade {
         cartService.clearCart();
 
         for (OrderObserver observer : observers) {
-            observer.update("New order placed. Order ID: " + savedOrder.getId() + ", Total: " + savedOrder.getTotalAmount());
+            observer.update(
+                    "New order placed. Order ID: " + savedOrder.getId()
+                            + ", Customer: " + user.getEmail()
+                            + ", Total: " + savedOrder.getTotalAmount()
+            );
         }
 
         CheckoutResponseDto response = new CheckoutResponseDto();

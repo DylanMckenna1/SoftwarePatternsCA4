@@ -133,7 +133,7 @@ const result = await checkoutOrder(currentUser.email);
         console.error("Checkout error:", error);
 
         if (checkoutMessage) {
-            checkoutMessage.textContent = "Order could not be placed. Please try again.";
+            checkoutMessage.textContent = error.message || "Order could not be placed. Please try again.";
             checkoutMessage.className = "error-message";
         }
     }
