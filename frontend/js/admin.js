@@ -4,7 +4,8 @@ import {
     updateAdminProduct,
     getAdminOrders,
     restockAdminProduct,
-    deleteAdminProduct
+    deleteAdminProduct,
+    advanceAdminOrder
 } from "./api.js";
 
 const adminLoginForm = document.getElementById("adminLoginForm");
@@ -152,21 +153,40 @@ async function loadAdminOrders() {
         }
 
         adminOrdersList.innerHTML = orders.map(order => `
-            <div class="admin-product-item">
-                <div>
-                    <strong>Order #${order.orderId}</strong>
-                    <p>Customer: ${order.customerName}</p>
-                    <p>Email: ${order.customerEmail}</p>
-                    <p>Total: €${Number(order.totalAmount).toFixed(2)}</p>
-                    <p>Status: ${order.status}</p>
-                    <p>Items: ${order.itemCount}</p>
-                </div>
-            </div>
-        `).join("");
+    <div class="admin-product-item">
+        <div>
+            <strong>Order #${order.orderId}</strong>
+            <p>Customer: ${order.customerName}</p>
+            <p>Email: ${order.customerEmail}</p>
+            <p>Total: €${Number(order.totalAmount).toFixed(2)}</p>
+            <p>Status: ${order.status}</p>
+            <p>Items: ${order.itemCount}</p>
+        </div>
+        <div class="admin-item-actions">
+            <button class="cart-button advance-order-btn" data-id="${order.orderId}">Advance Status</button>
+        </div>
+       </div>
+`    ).join("");
     } catch (error) {
         console.error(error);
         adminOrdersList.innerHTML = `<p>Failed to load orders.</p>`;
     }
+
+    document.querySelectorAll(".advance-order-btn").forEach(button => {
+    button.addEventListener("click", async () => {
+        try {
+            await advanceAdminOrder(
+                button.dataset.id,
+                adminCredentials.username,
+                adminCredentials.password
+            );
+            await loadAdminOrders();
+        } catch (error) {
+            console.error(error);
+            setMessage(adminLoginMessage, "Failed to update order status.", "error");
+        }
+    });
+});
 }
 
 if (adminLoginForm) {

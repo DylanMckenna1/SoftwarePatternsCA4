@@ -152,3 +152,12 @@ export async function deleteAdminProduct(productId, username, password) {
 
     return response.text();
 }
+
+export async function advanceAdminOrder(orderId, username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/orders/${orderId}/advance`, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+        }
+    });
+}

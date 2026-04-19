@@ -6,7 +6,9 @@ import com.dylan.clothesstore.repository.CustomerOrderRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.dylan.clothesstore.service.state.OrderStateContext;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import java.util.List;
 
 @RestController
@@ -14,18 +16,33 @@ import java.util.List;
 public class AdminOrderController {
 
     private final CustomerOrderRepository customerOrderRepository;
+    private final OrderStateContext orderStateContext;
 
-    public AdminOrderController(CustomerOrderRepository customerOrderRepository) {
-        this.customerOrderRepository = customerOrderRepository;
-    }
+    public AdminOrderController(CustomerOrderRepository customerOrderRepository,
+                            OrderStateContext orderStateContext) {
+    this.customerOrderRepository = customerOrderRepository;
+    this.orderStateContext = orderStateContext;
+}
 
     @GetMapping
-    public List<AdminOrderResponseDto> getAllOrders() {
+     public List<AdminOrderResponseDto> getAllOrders() {
         return customerOrderRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
                 .toList();
     }
+
+    @PutMapping("/{id}/advance")
+     public AdminOrderResponseDto advanceOrderStatus(@PathVariable Long id) {
+      CustomerOrder order = customerOrderRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+      String nextStatus = orderStateContext.getNextStatus(order.getStatus());
+       order.setStatus(nextStatus);
+
+      CustomerOrder savedOrder = customerOrderRepository.save(order);
+    return mapToDto(savedOrder);
+}
 
     private AdminOrderResponseDto mapToDto(CustomerOrder order) {
         AdminOrderResponseDto dto = new AdminOrderResponseDto();
