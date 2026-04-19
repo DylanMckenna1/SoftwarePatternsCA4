@@ -119,6 +119,25 @@ export async function updateAdminProduct(productId, payload, username, password)
     });
 }
 
+export async function getAdminOrders(username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/orders`, {
+        headers: {
+            "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+        }
+    });
+}
+
+export async function restockAdminProduct(productId, quantity, username, password) {
+    return fetchJson(`${API_BASE_URL}/admin/products/${productId}/restock`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+        },
+        body: JSON.stringify({ quantity })
+    });
+}
+
 export async function deleteAdminProduct(productId, username, password) {
     const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
         method: "DELETE",
