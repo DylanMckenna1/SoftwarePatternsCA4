@@ -43,6 +43,7 @@ public class AdminProductController {
 
     @PostMapping
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto request) {
+        validateProductRequest(request);
         Product product = new Product();
         applyRequestToProduct(product, request);
         Product savedProduct = productRepository.save(product);
@@ -54,6 +55,7 @@ public class AdminProductController {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
+        validateProductRequest(request);
         applyRequestToProduct(product, request);
         Product savedProduct = productRepository.save(product);
         return mapToDto(savedProduct, false);
@@ -82,6 +84,48 @@ public class AdminProductController {
 
         Product savedProduct = productRepository.save(product);
         return mapToDto(savedProduct, false);
+    }
+
+    private void validateProductRequest(ProductRequestDto request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Product details are required");
+        }
+
+        if (!hasText(request.getTitle())) {
+            throw new IllegalArgumentException("Product title is required");
+        }
+
+        if (!hasText(request.getDescription())) {
+            throw new IllegalArgumentException("Product description is required");
+        }
+
+        if (request.getPrice() == null || request.getPrice().signum() <= 0) {
+            throw new IllegalArgumentException("Product price must be greater than zero");
+        }
+
+        if (request.getStockQuantity() == null || request.getStockQuantity() < 0) {
+            throw new IllegalArgumentException("Stock quantity cannot be negative");
+        }
+
+        if (!hasText(request.getImageUrl())) {
+            throw new IllegalArgumentException("Product image URL is required");
+        }
+
+        if (!hasText(request.getSize())) {
+            throw new IllegalArgumentException("Product size is required");
+        }
+
+        if (!hasText(request.getColour())) {
+            throw new IllegalArgumentException("Product colour is required");
+        }
+
+        if (!hasText(request.getCategoryName())) {
+            throw new IllegalArgumentException("Product category is required");
+        }
+
+        if (!hasText(request.getManufacturerName())) {
+            throw new IllegalArgumentException("Product manufacturer is required");
+        }
     }
 
     private void applyRequestToProduct(Product product, ProductRequestDto request) {
@@ -124,5 +168,9 @@ public class AdminProductController {
         dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
         dto.setManufacturerName(product.getManufacturer() != null ? product.getManufacturer().getName() : null);
         return dto;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

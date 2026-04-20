@@ -47,13 +47,13 @@ export async function addBackendCartItem(productId) {
     });
 }
 
-export async function checkoutOrder(email) {
+export async function checkoutOrder(payload) {
     return fetchJson(`${API_BASE_URL}/checkout`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify(payload)
     });
 }
 

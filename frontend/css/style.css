@@ -409,3 +409,23 @@ ul {
         grid-template-columns: 1fr;
     }
 }
+
+.checkout-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.checkout-details input,
+.checkout-details textarea,
+.checkout-details select {
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+}
+
+.checkout-details textarea {
+    min-height: 90px;
+    resize: vertical;
+}

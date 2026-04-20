@@ -44,7 +44,10 @@ public class CheckoutFacade {
     }
 
     @Transactional
-    public CheckoutResponseDto checkout(String email) {
+    public CheckoutResponseDto checkout(String email,
+                                    String customerName,
+                                    String shippingAddress,
+                                    String paymentMethod)   {
         Map<Long, Integer> cart = cartService.getCart();
 
         if (cart.isEmpty()) {
@@ -54,10 +57,17 @@ public class CheckoutFacade {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        if (!hasText(customerName) || !hasText(shippingAddress) || !hasText(paymentMethod)) {
+            throw new IllegalArgumentException("Please complete all checkout details.");
+        }
+
         CustomerOrder customerOrder = new CustomerOrder();
         customerOrder.setOrderDate(LocalDateTime.now());
         customerOrder.setStatus("PLACED");
         customerOrder.setUser(user);
+        customerOrder.setCustomerName(customerName);
+        customerOrder.setShippingAddress(shippingAddress);
+        customerOrder.setPaymentMethod(paymentMethod);
 
         BigDecimal total = BigDecimal.ZERO;
         int itemCount = 0;
@@ -116,5 +126,9 @@ public class CheckoutFacade {
         response.setItemCount(itemCount);
 
         return response;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

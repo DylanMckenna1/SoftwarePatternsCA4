@@ -3,6 +3,8 @@ import { CartManager } from "./cart.js";
 
 const productGrid = document.getElementById("productGrid");
 const searchInput = document.getElementById("searchInput");
+const categoryInput = document.getElementById("categoryInput");
+const manufacturerInput = document.getElementById("manufacturerInput");
 const sortSelect = document.getElementById("sortSelect");
 const pageMessage = document.getElementById("pageMessage");
 
@@ -37,6 +39,29 @@ function getProductImage(product) {
     return product.imageUrl || "https://via.placeholder.com/600x400?text=No+Image";
 }
 
+function normalizeSearchValue(value) {
+    return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+}
+
+function matchesSearchValue(value, searchTerm) {
+    if (!searchTerm) return true;
+    return normalizeSearchValue(value).includes(normalizeSearchValue(searchTerm));
+}
+
+function filterProducts(products) {
+    const title = searchInput ? searchInput.value.trim() : "";
+    const category = categoryInput ? categoryInput.value.trim() : "";
+    const manufacturer = manufacturerInput ? manufacturerInput.value.trim() : "";
+
+    return products.filter(product => {
+        return matchesSearchValue(product.title, title)
+            && matchesSearchValue(getCategoryName(product), category)
+            && matchesSearchValue(getManufacturerName(product), manufacturer);
+    });
+}
+
 function sortProducts(products) {
     const sortValue = sortSelect ? sortSelect.value : "";
 
@@ -44,7 +69,9 @@ function sortProducts(products) {
         "price-asc": (a, b) => getDisplayPrice(a) - getDisplayPrice(b),
         "price-desc": (a, b) => getDisplayPrice(b) - getDisplayPrice(a),
         "title-asc": (a, b) => a.title.localeCompare(b.title),
-        "title-desc": (a, b) => b.title.localeCompare(a.title)
+        "title-desc": (a, b) => b.title.localeCompare(a.title),
+        "manufacturer-asc": (a, b) => getManufacturerName(a).localeCompare(getManufacturerName(b)),
+        "manufacturer-desc": (a, b) => getManufacturerName(b).localeCompare(getManufacturerName(a))
     };
 
     if (sortStrategies[sortValue]) {
@@ -55,16 +82,9 @@ function sortProducts(products) {
 }
 
 export function buildQuery() {
-    const title = searchInput ? searchInput.value.trim() : "";
     const params = new URLSearchParams();
-
-    if (title) {
-        params.append("title", title);
-    }
-
     params.append("discount", "true");
-
-    return params.toString() ? `?${params.toString()}` : "";
+    return `?${params.toString()}`;
 }
 
 export function renderProducts(products, onCartUpdate) {
@@ -98,7 +118,8 @@ export function renderProducts(products, onCartUpdate) {
             const productId = Number(button.dataset.productId);
             CartManager.addItem(productId);
             onCartUpdate();
-            showPageMessage("Item added to cart.");
+            const cartCount = CartManager.getItemCount();
+            showPageMessage(`Item added to cart. Cart now has ${cartCount} item${cartCount === 1 ? "" : "s"}.`);
         });
     });
 }
@@ -109,6 +130,7 @@ export async function loadProducts(onCartUpdate, query = "?discount=true") {
     try {
         productGrid.innerHTML = `<p class="empty-message">Loading products...</p>`;
         let products = await getProducts(query);
+        products = filterProducts(products);
         products = sortProducts(products);
         renderProducts(products, onCartUpdate);
     } catch (error) {

@@ -2,13 +2,15 @@ package com.dylan.clothesstore.controller;
 
 import com.dylan.clothesstore.dto.AdminOrderResponseDto;
 import com.dylan.clothesstore.model.CustomerOrder;
+import com.dylan.clothesstore.model.OrderItem;
 import com.dylan.clothesstore.repository.CustomerOrderRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.dylan.clothesstore.service.state.OrderStateContext;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
@@ -19,13 +21,13 @@ public class AdminOrderController {
     private final OrderStateContext orderStateContext;
 
     public AdminOrderController(CustomerOrderRepository customerOrderRepository,
-                            OrderStateContext orderStateContext) {
-    this.customerOrderRepository = customerOrderRepository;
-    this.orderStateContext = orderStateContext;
-}
+                                OrderStateContext orderStateContext) {
+        this.customerOrderRepository = customerOrderRepository;
+        this.orderStateContext = orderStateContext;
+    }
 
     @GetMapping
-     public List<AdminOrderResponseDto> getAllOrders() {
+    public List<AdminOrderResponseDto> getAllOrders() {
         return customerOrderRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
@@ -33,16 +35,16 @@ public class AdminOrderController {
     }
 
     @PutMapping("/{id}/advance")
-     public AdminOrderResponseDto advanceOrderStatus(@PathVariable Long id) {
-      CustomerOrder order = customerOrderRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+    public AdminOrderResponseDto advanceOrderStatus(@PathVariable Long id) {
+        CustomerOrder order = customerOrderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-      String nextStatus = orderStateContext.getNextStatus(order.getStatus());
-       order.setStatus(nextStatus);
+        String nextStatus = orderStateContext.getNextStatus(order.getStatus());
+        order.setStatus(nextStatus);
 
-      CustomerOrder savedOrder = customerOrderRepository.save(order);
-    return mapToDto(savedOrder);
-}
+        CustomerOrder savedOrder = customerOrderRepository.save(order);
+        return mapToDto(savedOrder);
+    }
 
     private AdminOrderResponseDto mapToDto(CustomerOrder order) {
         AdminOrderResponseDto dto = new AdminOrderResponseDto();
@@ -50,7 +52,9 @@ public class AdminOrderController {
         dto.setOrderDate(order.getOrderDate());
         dto.setTotalAmount(order.getTotalAmount());
         dto.setStatus(order.getStatus());
-        dto.setItemCount(order.getItems() != null ? order.getItems().size() : 0);
+        dto.setItemCount(order.getItems() != null
+                ? order.getItems().stream().mapToInt(OrderItem::getQuantity).sum()
+                : 0);
 
         if (order.getUser() != null) {
             dto.setCustomerEmail(order.getUser().getEmail());

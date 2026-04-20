@@ -4,7 +4,11 @@ import { CartManager } from "./cart.js";
 const checkoutButton = document.getElementById("checkoutButton");
 const checkoutMessage = document.getElementById("checkoutMessage");
 const ratingSection = document.getElementById("ratingSection");
+const customerNameInput = document.getElementById("customerNameInput");
+const shippingAddressInput = document.getElementById("shippingAddressInput");
+const paymentMethodSelect = document.getElementById("paymentMethodSelect");
 const orderIdInput = document.getElementById("orderIdInput");
+const orderIdDisplay = document.getElementById("orderIdDisplay");
 
 export async function loadCart(updateCartCount) {
     const cartItemsContainer = document.getElementById("cartItems");
@@ -107,23 +111,46 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (checkoutMessage) {
         checkoutMessage.textContent = "Please log in before placing an order.";
         checkoutMessage.className = "error-message";
-            }
-        return;
-        }
+    }
+    return;
+}
 
-const result = await checkoutOrder(currentUser.email);
+const customerName = customerNameInput ? customerNameInput.value.trim() : "";
+const shippingAddress = shippingAddressInput ? shippingAddressInput.value.trim() : "";
+const paymentMethod = paymentMethodSelect ? paymentMethodSelect.value : "";
+
+if (!customerName || !shippingAddress || !paymentMethod) {
+    if (checkoutMessage) {
+        checkoutMessage.textContent = "Please complete all checkout details.";
+        checkoutMessage.className = "error-message";
+    }
+    return;
+}
+
+const payload = {
+    email: currentUser.email,
+    customerName,
+    shippingAddress,
+    paymentMethod
+};
+
+const result = await checkoutOrder(payload);
 
         CartManager.clearCart();
         updateCartCount();
         await loadCart(updateCartCount);
 
         if (checkoutMessage) {
-            checkoutMessage.textContent = `Order placed successfully. Order ID: ${result.orderId}`;
-            checkoutMessage.className = "success-message";
+             checkoutMessage.textContent = `Order placed successfully. Order ID: ${result.orderId}. Total paid: €${Number(result.totalAmount).toFixed(2)}`;
+             checkoutMessage.className = "success-message";
         }
 
         if (ratingSection) {
             ratingSection.style.display = "block";
+        }
+
+        if (orderIdDisplay) {
+            orderIdDisplay.textContent = result.orderId;
         }
 
         if (orderIdInput) {

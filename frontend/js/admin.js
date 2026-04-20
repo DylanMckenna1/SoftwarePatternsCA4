@@ -25,6 +25,10 @@ function setMessage(element, message, type) {
     element.className = `${type}-message`;
 }
 
+function getErrorMessage(error, fallback) {
+    return error && error.message ? error.message : fallback;
+}
+
 function getFormPayload() {
     return {
         title: document.getElementById("productTitle").value.trim(),
@@ -71,20 +75,20 @@ async function loadAdminProducts() {
     try {
         const products = await getAdminProducts(adminCredentials.username, adminCredentials.password);
 
-          adminProductsList.innerHTML = products.map(product => `
-    <div class="admin-product-item">
-        <div>
-            <strong>${product.title}</strong>
-            <p>€${Number(product.price).toFixed(2)} | Stock: ${product.stockQuantity}</p>
-            <p>${product.categoryName || "N/A"} | ${product.manufacturerName || "N/A"}</p>
-        </div>
-        <div class="admin-item-actions">
-            <button class="cart-button edit-product-btn" data-id="${product.id}">Edit</button>
-            <button class="cart-button restock-product-btn" data-id="${product.id}">Restock</button>
-            <button class="remove-button delete-product-btn" data-id="${product.id}">Delete</button>
-        </div>
-    </div>
-       `).join("");
+        adminProductsList.innerHTML = products.map(product => `
+            <div class="admin-product-item">
+                <div>
+                    <strong>${product.title}</strong>
+                    <p>€${Number(product.price).toFixed(2)} | Stock: ${product.stockQuantity}</p>
+                    <p>${product.categoryName || "N/A"} | ${product.manufacturerName || "N/A"}</p>
+                </div>
+                <div class="admin-item-actions">
+                    <button class="cart-button edit-product-btn" data-id="${product.id}">Edit</button>
+                    <button class="cart-button restock-product-btn" data-id="${product.id}">Restock</button>
+                    <button class="remove-button delete-product-btn" data-id="${product.id}">Delete</button>
+                </div>
+            </div>
+        `).join("");
 
         document.querySelectorAll(".edit-product-btn").forEach(button => {
             button.addEventListener("click", async () => {
@@ -98,28 +102,28 @@ async function loadAdminProducts() {
         });
 
         document.querySelectorAll(".restock-product-btn").forEach(button => {
-    button.addEventListener("click", async () => {
-        const quantityInput = prompt("Enter quantity to add to stock:");
+            button.addEventListener("click", async () => {
+                const quantityInput = prompt("Enter quantity to add to stock:");
 
-        if (!quantityInput) return;
+                if (!quantityInput) return;
 
-        const quantity = parseInt(quantityInput);
+                const quantity = parseInt(quantityInput);
 
-        if (isNaN(quantity) || quantity <= 0) {
-            setMessage(adminProductMessage, "Restock quantity must be greater than zero.", "error");
-            return;
-        }
+                if (isNaN(quantity) || quantity <= 0) {
+                    setMessage(adminProductMessage, "Restock quantity must be greater than zero.", "error");
+                    return;
+                }
 
-        try {
-            await restockAdminProduct(button.dataset.id, quantity, adminCredentials.username, adminCredentials.password);
-            setMessage(adminProductMessage, "Product restocked successfully.", "success");
-            await loadAdminProducts();
-               } catch (error) {
-            console.error(error);
-            setMessage(adminProductMessage, "Failed to restock product.", "error");
-               }
-           });
-       });
+                try {
+                    await restockAdminProduct(button.dataset.id, quantity, adminCredentials.username, adminCredentials.password);
+                    setMessage(adminProductMessage, "Product restocked successfully.", "success");
+                    await loadAdminProducts();
+                } catch (error) {
+                    console.error(error);
+                    setMessage(adminProductMessage, getErrorMessage(error, "Failed to restock product."), "error");
+                }
+            });
+        });
 
         document.querySelectorAll(".delete-product-btn").forEach(button => {
             button.addEventListener("click", async () => {
@@ -131,13 +135,13 @@ async function loadAdminProducts() {
                     clearForm();
                 } catch (error) {
                     console.error(error);
-                    setMessage(adminProductMessage, "Failed to delete product.", "error");
+                    setMessage(adminProductMessage, getErrorMessage(error, "Failed to delete product."), "error");
                 }
             });
         });
     } catch (error) {
         console.error(error);
-        setMessage(adminLoginMessage, "Could not load admin products.", "error");
+        setMessage(adminLoginMessage, getErrorMessage(error, "Could not load admin products."), "error");
     }
 }
 
@@ -153,40 +157,41 @@ async function loadAdminOrders() {
         }
 
         adminOrdersList.innerHTML = orders.map(order => `
-    <div class="admin-product-item">
-        <div>
-            <strong>Order #${order.orderId}</strong>
-            <p>Customer: ${order.customerName}</p>
-            <p>Email: ${order.customerEmail}</p>
-            <p>Total: €${Number(order.totalAmount).toFixed(2)}</p>
-            <p>Status: ${order.status}</p>
-            <p>Items: ${order.itemCount}</p>
-        </div>
-        <div class="admin-item-actions">
-            <button class="cart-button advance-order-btn" data-id="${order.orderId}">Advance Status</button>
-        </div>
-       </div>
-`    ).join("");
+            <div class="admin-product-item">
+                <div>
+                    <strong>Order #${order.orderId}</strong>
+                    <p>Customer: ${order.customerName}</p>
+                    <p>Email: ${order.customerEmail}</p>
+                    <p>Total: €${Number(order.totalAmount).toFixed(2)}</p>
+                    <p>Status: ${order.status}</p>
+                    <p>Items: ${order.itemCount}</p>
+                </div>
+                <div class="admin-item-actions">
+                    <button class="cart-button advance-order-btn" data-id="${order.orderId}">Advance Status</button>
+                </div>
+            </div>
+        `).join("");
     } catch (error) {
         console.error(error);
         adminOrdersList.innerHTML = `<p>Failed to load orders.</p>`;
     }
 
     document.querySelectorAll(".advance-order-btn").forEach(button => {
-    button.addEventListener("click", async () => {
-        try {
-            await advanceAdminOrder(
-                button.dataset.id,
-                adminCredentials.username,
-                adminCredentials.password
-            );
-            await loadAdminOrders();
-        } catch (error) {
-            console.error(error);
-            setMessage(adminLoginMessage, "Failed to update order status.", "error");
-        }
+        button.addEventListener("click", async () => {
+            try {
+                await advanceAdminOrder(
+                    button.dataset.id,
+                    adminCredentials.username,
+                    adminCredentials.password
+                );
+                setMessage(adminLoginMessage, "Order status updated.", "success");
+                await loadAdminOrders();
+            } catch (error) {
+                console.error(error);
+                setMessage(adminLoginMessage, getErrorMessage(error, "Failed to update order status."), "error");
+            }
+        });
     });
-});
 }
 
 if (adminLoginForm) {
@@ -206,7 +211,7 @@ if (adminLoginForm) {
         } catch (error) {
             console.error(error);
             adminPanel.style.display = "none";
-            setMessage(adminLoginMessage, "Invalid admin credentials.", "error");
+            setMessage(adminLoginMessage, getErrorMessage(error, "Invalid admin credentials."), "error");
         }
     });
 }
@@ -237,7 +242,7 @@ if (adminProductForm) {
             await loadAdminOrders();
         } catch (error) {
             console.error(error);
-            setMessage(adminProductMessage, "Failed to save product.", "error");
+            setMessage(adminProductMessage, getErrorMessage(error, "Failed to save product."), "error");
         }
     });
 }
@@ -248,4 +253,3 @@ if (clearAdminFormButton) {
         setMessage(adminProductMessage, "", "success");
     });
 }
-

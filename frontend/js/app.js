@@ -1,17 +1,19 @@
 import { CartManager } from "./cart.js";
-import { loadProducts, buildQuery, loadProductDetails } from "./products.js";
-import { loadCart, bindCheckoutButton } from "./checkout.js";
-import { bindRatingButton } from "./rating.js";
+import { loadProducts, buildQuery, loadProductDetails } from "./products.js?v=20260420-2";
+import { loadCart, bindCheckoutButton } from "./checkout.js?v=20260420-2";
+import { bindRatingButton } from "./rating.js?v=20260420-2";
 
-const cartCountBadge = document.getElementById("cartCountBadge");
 const checkoutButton = document.getElementById("checkoutButton");
 const searchButton = document.getElementById("searchButton");
 const resetButton = document.getElementById("resetButton");
 const searchInput = document.getElementById("searchInput");
+const categoryInput = document.getElementById("categoryInput");
+const manufacturerInput = document.getElementById("manufacturerInput");
 const sortSelect = document.getElementById("sortSelect");
 
 function updateCartCount() {
     const totalCount = CartManager.getItemCount();
+    const cartCountBadge = document.getElementById("cartCountBadge");
 
     if (cartCountBadge) {
         cartCountBadge.textContent = totalCount;
@@ -31,12 +33,13 @@ function updateNavbarForUser() {
 
     if (!currentUser) {
         nav.innerHTML = `
-            <a href="index.html">Home</a>
-            <a href="products.html">Products</a>
-            <a href="cart.html">Cart</a>
-            <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        `;
+       <a href="index.html">Home</a>
+       <a href="products.html">Products</a>
+       <a href="cart.html">Cart <span id="cartCountBadge" class="cart-badge">0</span></a>
+       <a href="login.html">Login</a>
+       <a href="register.html">Register</a>
+`;
+        updateCartCount();
         return;
     }
 
@@ -45,13 +48,13 @@ function updateNavbarForUser() {
         : "";
 
     nav.innerHTML = `
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
-        <a href="cart.html">Cart</a>
-        ${adminLink}
-        <span class="nav-user">Welcome, ${currentUser.firstName}</span>
-        <a href="#" id="logoutLink">Logout</a>
-    `;
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="cart.html">Cart <span id="cartCountBadge" class="cart-badge">0</span></a>
+      ${adminLink}
+      <span class="nav-user">Welcome, ${currentUser.firstName}</span>
+      <a href="#" id="logoutLink">Logout</a>
+`;
 
     const logoutLink = document.getElementById("logoutLink");
     if (logoutLink) {
@@ -61,6 +64,7 @@ function updateNavbarForUser() {
             window.location.href = "index.html";
         });
     }
+         updateCartCount();
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -83,6 +87,14 @@ if (resetButton) {
     resetButton.addEventListener("click", () => {
         if (searchInput) {
             searchInput.value = "";
+        }
+
+        if (categoryInput) {
+            categoryInput.value = "";
+        }
+
+        if (manufacturerInput) {
+            manufacturerInput.value = "";
         }
 
         if (sortSelect) {

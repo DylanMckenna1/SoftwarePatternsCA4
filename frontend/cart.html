@@ -8,11 +8,11 @@
 </head>
 <body>
     <header class="navbar">
-        <div class="brand">Clothes Store <span id="cartCountBadge" class="cart-badge">0</span></div>
+        <div class="brand">Clothes Store</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="products.html">Products</a>
-            <a href="cart.html">Cart</a>
+            <a href="cart.html">Cart <span id="cartCountBadge" class="cart-badge">0</span></a>
             <a href="login.html">Login</a>
             <a href="register.html">Register</a>
         </nav>
@@ -31,14 +31,31 @@
         <section class="cart-summary">
             <h2>Total</h2>
             <p id="cartTotal">€0.00</p>
+
+            <div class="checkout-details">
+                <label for="customerNameInput">Customer Name</label>
+                <input type="text" id="customerNameInput" placeholder="Enter your full name">
+
+                <label for="shippingAddressInput">Shipping Address</label>
+                <input type="text" id="shippingAddressInput" placeholder="Enter your shipping address">
+
+                <label for="paymentMethodSelect">Payment Method</label>
+                <select id="paymentMethodSelect">
+                    <option value="">Select payment method</option>
+                    <option value="Card">Card</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="Cash on Delivery">Cash on Delivery</option>
+                </select>
+            </div>
+
             <button id="checkoutButton" class="cart-button">Place Order</button>
             <p id="checkoutMessage"></p>
 
             <div id="ratingSection" class="rating-section" style="display: none;">
                 <h3>Rate Your Order</h3>
 
-                <label for="orderIdInput">Order ID</label>
-                <input type="number" id="orderIdInput" placeholder="Enter order ID">
+                <p><strong>Order ID:</strong> <span id="orderIdDisplay">Not available</span></p>
+                <input type="hidden" id="orderIdInput">
 
                 <label for="ratingScore">Rating</label>
                 <select id="ratingScore">
@@ -58,6 +75,6 @@
         </section>
     </main>
 
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js?v=20260420-2"></script>
 </body>
 </html>

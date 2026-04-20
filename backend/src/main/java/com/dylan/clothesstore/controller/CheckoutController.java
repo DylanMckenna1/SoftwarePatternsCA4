@@ -20,6 +20,11 @@ public class CheckoutController {
 
     @PostMapping
     public CheckoutResponseDto checkout(@RequestBody CheckoutRequestDto request) {
-        return checkoutFacade.checkout(request.getEmail());
+        return checkoutFacade.checkout(
+                request.getEmail(),
+                request.getCustomerName(),
+                request.getShippingAddress(),
+                request.getPaymentMethod()
+        );
     }
 }

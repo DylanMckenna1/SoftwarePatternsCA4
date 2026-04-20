@@ -19,6 +19,15 @@ import java.util.List;
 @NoArgsConstructor
 public class CustomerOrder {
 
+    @Column(nullable = false)
+    private String shippingAddress;
+
+    @Column(nullable = false)
+    private String paymentMethod;
+
+    @Column(nullable = false)
+    private String customerName;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
